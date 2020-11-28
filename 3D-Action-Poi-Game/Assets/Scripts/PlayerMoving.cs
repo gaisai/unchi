@@ -85,6 +85,9 @@ public class PlayerMoving : MonoBehaviour
     static int RotateSpeed = RotateWalkSpeed;
 
     int RotatePosition = 0;
+
+    int MouseSensitive =3;
+
     int RotateMax = 80;
 
     
@@ -206,10 +209,8 @@ public class PlayerMoving : MonoBehaviour
 
 
         //マウス視点移動
-        player.Rotate(0,3*Input.GetAxis("Mouse X")*3,0);
-        
-        //float camera_x = camera.localEulerAngles.x + Input.GetAxis("Mouse Y")*3;
-        camera.Rotate(Input.GetAxis("Mouse Y")*-3,0,0);
+        player.Rotate(0,3*Input.GetAxis("Mouse X")*MouseSensitive,0);
+        camera.Rotate(Input.GetAxis("Mouse Y")*-1*MouseSensitive,0,0);
         
         
         //DataBase.BordMassage += 
