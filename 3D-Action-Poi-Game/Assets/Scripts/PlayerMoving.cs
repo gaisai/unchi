@@ -12,7 +12,7 @@ public class PlayerMoving : MonoBehaviour
         
     }
 
-    Transform arml,armr,legl,legr,body,player;
+    Transform arml,armr,legl,legr,body,player,camera;
     Rigidbody playerRagid;
 
     public static class moving{
@@ -86,6 +86,8 @@ public class PlayerMoving : MonoBehaviour
 
     int RotatePosition = 0;
     int RotateMax = 80;
+
+    
     
     // Start is called before the first frame update
     void Start()
@@ -97,12 +99,17 @@ public class PlayerMoving : MonoBehaviour
         body = GameObject.Find("Body").transform;
         player = GameObject.Find("Player").transform;
         playerRagid = GameObject.Find("Player").GetComponent<Rigidbody>();
+        camera = GameObject.Find("Camera").transform;
     }
 
     // Update is called once per frame
     void Update()
     {
         DataBase.BordMassage = "";
+
+        //double rad_y = player.rotation.y;
+
+        double rad_y = player.localEulerAngles.y;
         
         string l = "";
         if(Input.GetKey(KeyCode.W)) l=l+"w";
@@ -123,13 +130,18 @@ public class PlayerMoving : MonoBehaviour
             System.Convert.ToInt32(Input.GetKey(KeyCode.LeftShift))
         );
    
+
+
+
+
         
         //平面むき
         if( moving.Direction.vertical!=0 || moving.Direction.width!=0 ){
-            int rad = Convert.ToInt32( 180 / Math.PI * Math.Atan2( moving.Direction.width, moving.Direction.vertical ));
-            //DataBase.BordMassage +=  Convert.ToString(rad);
+            int rad = Convert.ToInt32( 180 / Math.PI * ( Math.Atan2( moving.Direction.width, moving.Direction.vertical ) ));
+            DataBase.BordMassage +=  "\n"+Convert.ToString(rad_y);
 
-            body.rotation = UnityEngine.Quaternion.Euler(0, rad,0);
+            body.rotation = UnityEngine.Quaternion.Euler(0, rad+(float)rad_y, 0);
+
         }
 
         //上下移動
@@ -174,12 +186,30 @@ public class PlayerMoving : MonoBehaviour
 
 
         //移動
+        
+        double moving_x =  
+            (-1 * moving.Speed.status * moving.Direction.vertical) * Math.Sin(Math.PI*rad_y/180) +
+            (-1 * moving.Speed.status * moving.Direction.width) * Math.Cos(Math.PI*rad_y/180)
+        ;
+        double moving_z = 
+            (-1 * moving.Speed.status * moving.Direction.vertical) * Math.Cos(Math.PI*rad_y/180) + 
+            ( moving.Speed.status * moving.Direction.width) * Math.Sin(Math.PI*rad_y/180)
+            
+        ;
+
+
         playerRagid.velocity = new UnityEngine.Vector3(
-            -1 * moving.Speed.status * moving.Direction.width,
+            (float)moving_x,
             moving.Speed.height,
-            -1 * moving.Speed.status*moving.Direction.vertical
+            (float)moving_z
         );
 
+
+        //マウス視点移動
+        player.Rotate(0,3*Input.GetAxis("Mouse X")*3,0);
+        
+        //float camera_x = camera.localEulerAngles.x + Input.GetAxis("Mouse Y")*3;
+        camera.Rotate(Input.GetAxis("Mouse Y")*-3,0,0);
         
         
         //DataBase.BordMassage += 
