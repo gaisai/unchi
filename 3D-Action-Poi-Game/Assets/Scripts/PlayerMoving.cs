@@ -78,6 +78,33 @@ public class PlayerMoving : MonoBehaviour
 
     }
 
+    public static class attack{
+        public static Color obj = GameObject.Find("Effect").GetComponent<Renderer>().material.color;
+        public static float EffectFlameMax = 1.0f;
+        public static float EffectFlameDiff = 0.1f;
+        public static int EffectFlameNow = Convert.ToInt32(EffectFlameMax/EffectFlameDiff);
+
+        public static bool EffectDoing = false;
+
+        public static int FadeEffect(){
+
+            GameObject.Find("Effect").GetComponent<Renderer>().material.color = 
+                new Color(obj.r,obj.g,obj.b ,EffectFlameNow*EffectFlameDiff);
+            EffectFlameNow -= 1;
+            if(EffectFlameNow <0){
+                EffectFlameNow = Convert.ToInt32(EffectFlameMax/EffectFlameDiff);
+                EffectDoing = false;
+                return 1;
+            }
+            EffectDoing = true;
+            return 0;
+            
+        }
+    
+    }
+
+
+
     //歩きモーション変数
     static int RotateWalkSpeed = 5;
     static int RotateRunSpeed = 20;
@@ -112,111 +139,157 @@ public class PlayerMoving : MonoBehaviour
 
         //double rad_y = player.rotation.y;
 
-        double rad_y = player.localEulerAngles.y;
-        
-        string l = "";
-        if(Input.GetKey(KeyCode.W)) l=l+"w";
-        if(Input.GetKey(KeyCode.S)) l=l+"s";
-        if(Input.GetKey(KeyCode.D)) l=l+"d";
-        if(Input.GetKey(KeyCode.A)) l=l+"a";
-        if(Input.GetKey(KeyCode.Space)) l=l+",Jump";
-        if(Input.GetKey(KeyCode.LeftShift)) l=l+",Run";
 
-        DataBase.BordMassage += l;
-        
-        moving.InputAccSpd(
-            System.Convert.ToInt32(Input.GetKey(KeyCode.W)),
-            System.Convert.ToInt32(Input.GetKey(KeyCode.S)),
-            System.Convert.ToInt32(Input.GetKey(KeyCode.D)),
-            System.Convert.ToInt32(Input.GetKey(KeyCode.A)),
-            System.Convert.ToInt32(Input.GetKey(KeyCode.Space)),
-            System.Convert.ToInt32(Input.GetKey(KeyCode.LeftShift))
-        );
-   
+        if (!attack.EffectDoing){
 
 
-
-
-        
-        //平面むき
-        if( moving.Direction.vertical!=0 || moving.Direction.width!=0 ){
-            int rad = Convert.ToInt32( 180 / Math.PI * ( Math.Atan2( moving.Direction.width, moving.Direction.vertical ) ));
-            DataBase.BordMassage +=  "\n"+Convert.ToString(rad_y);
-
-            body.rotation = UnityEngine.Quaternion.Euler(0, rad+(float)rad_y, 0);
-
-        }
-
-        //上下移動
-        if(DataBase.Onfloor){
+            double rad_y = player.localEulerAngles.y;
             
-            if(moving.Direction.space==1){
-                moving.Speed.height = moving.Speed.jump;
+            string l = "";
+            if(Input.GetKey(KeyCode.W)) l=l+"w";
+            if(Input.GetKey(KeyCode.S)) l=l+"s";
+            if(Input.GetKey(KeyCode.D)) l=l+"d";
+            if(Input.GetKey(KeyCode.A)) l=l+"a";
+            if(Input.GetKey(KeyCode.Space)) l=l+",Jump";
+            if(Input.GetKey(KeyCode.LeftShift)) l=l+",Run";
+
+            DataBase.BordMassage += l;
+            
+            moving.InputAccSpd(
+                System.Convert.ToInt32(Input.GetKey(KeyCode.W)),
+                System.Convert.ToInt32(Input.GetKey(KeyCode.S)),
+                System.Convert.ToInt32(Input.GetKey(KeyCode.D)),
+                System.Convert.ToInt32(Input.GetKey(KeyCode.A)),
+                System.Convert.ToInt32(Input.GetKey(KeyCode.Space)),
+                System.Convert.ToInt32(Input.GetKey(KeyCode.LeftShift))
+            );
+    
+
+
+
+
+            
+            //平面むき
+            if( moving.Direction.vertical!=0 || moving.Direction.width!=0 ){
+                int rad = Convert.ToInt32( 180 / Math.PI * ( Math.Atan2( moving.Direction.width, moving.Direction.vertical ) ));
+                DataBase.BordMassage +=  "\n"+Convert.ToString(rad_y);
+
+                body.rotation = UnityEngine.Quaternion.Euler(0, rad+(float)rad_y, 0);
+
+            }
+
+            //上下移動
+            if(DataBase.Onfloor){
+                
+                if(moving.Direction.space==1){
+                    moving.Speed.height = moving.Speed.jump;
+                }else{
+                    moving.Speed.height = 0;
+                }
             }else{
-                moving.Speed.height = 0;
+                moving.Speed.height += moving.Speed.gravity;
+                if(moving.Speed.height < moving.Speed.jump*-1){
+                    moving.Speed.height = moving.Speed.jump*-1;
+                }
             }
-        }else{
-            moving.Speed.height += moving.Speed.gravity;
-            if(moving.Speed.height < moving.Speed.jump*-1){
-                moving.Speed.height = moving.Speed.jump*-1;
-            }
-        }
-        
-        
-        ////移動モーション
-        if( moving.Direction.vertical!=0 || moving.Direction.width!=0){
             
-            arml.Rotate(RotateSpeed,0,0);
-            armr.Rotate(-1*RotateSpeed,0,0);
-            legl.Rotate(-1*RotateSpeed,0,0);
-            legr.Rotate(RotateSpeed,0,0);
+            
+            ////移動モーション
+            if( moving.Direction.vertical!=0 || moving.Direction.width!=0){
+                
+                arml.Rotate(RotateSpeed,0,0);
+                armr.Rotate(-1*RotateSpeed,0,0);
+                legl.Rotate(-1*RotateSpeed,0,0);
+                legr.Rotate(RotateSpeed,0,0);
 
-            RotatePosition += RotateSpeed;
-            if (System.Math.Abs(RotatePosition) > RotateMax){
-                RotateSpeed *= -1;
+                RotatePosition += RotateSpeed;
+                if (System.Math.Abs(RotatePosition) > RotateMax){
+                    RotateSpeed *= -1;
+                }
+                
+            }else{
+                arml.Rotate(-1*RotatePosition,0,0);
+                armr.Rotate(RotatePosition,0,0);
+                legl.Rotate(RotatePosition,0,0);
+                legr.Rotate(-1*RotatePosition,0,0);
+                RotatePosition = 0;
+
+            //DataBase.BordMassage = Convert.ToString(System.Math.Abs(RotatePosition)) +"\n"+ Convert.ToString(RotateMax);
             }
+
+
+
+            //移動
             
+            double moving_x =  
+                (-1 * moving.Speed.status * moving.Direction.vertical) * Math.Sin(Math.PI*rad_y/180) +
+                (-1 * moving.Speed.status * moving.Direction.width) * Math.Cos(Math.PI*rad_y/180)
+            ;
+            double moving_z = 
+                (-1 * moving.Speed.status * moving.Direction.vertical) * Math.Cos(Math.PI*rad_y/180) + 
+                ( moving.Speed.status * moving.Direction.width) * Math.Sin(Math.PI*rad_y/180)
+                
+            ;
+
+
+            playerRagid.velocity = new UnityEngine.Vector3(
+                (float)moving_x,
+                moving.Speed.height,
+                (float)moving_z
+            );
+
+
+            //マウス視点移動
+            player.Rotate(0,3*Input.GetAxis("Mouse X")*MouseSensitive,0);
+            camera.Rotate(Input.GetAxis("Mouse Y")*-1*MouseSensitive,0,0);
+            
+            
+            //DataBase.BordMassage += 
+            //    "posi:\n"+player.position.x +"\n,"+ player.position.y +"\n,"+ player.position.z+"\n"+
+            //    "move:\n"+moving.Speed.width +"\n,"+ moving.Speed.height +"\n,"+ moving.Speed.vertical
+            //;
+
+            //
+            if(Input.GetMouseButtonDown(0)){
+                attack.FadeEffect();
+            }
         }else{
+            attack.FadeEffect();     
+
+
             arml.Rotate(-1*RotatePosition,0,0);
             armr.Rotate(RotatePosition,0,0);
             legl.Rotate(RotatePosition,0,0);
             legr.Rotate(-1*RotatePosition,0,0);
             RotatePosition = 0;
 
-        //DataBase.BordMassage = Convert.ToString(System.Math.Abs(RotatePosition)) +"\n"+ Convert.ToString(RotateMax);
-        }
 
 
-
-        //移動
-        
-        double moving_x =  
-            (-1 * moving.Speed.status * moving.Direction.vertical) * Math.Sin(Math.PI*rad_y/180) +
-            (-1 * moving.Speed.status * moving.Direction.width) * Math.Cos(Math.PI*rad_y/180)
-        ;
-        double moving_z = 
-            (-1 * moving.Speed.status * moving.Direction.vertical) * Math.Cos(Math.PI*rad_y/180) + 
-            ( moving.Speed.status * moving.Direction.width) * Math.Sin(Math.PI*rad_y/180)
+            //上下移動
+            if(DataBase.Onfloor){
+                
+                if(moving.Direction.space==1){
+                    moving.Speed.height = moving.Speed.jump;
+                }else{
+                    moving.Speed.height = 0;
+                }
+            }else{
+                moving.Speed.height += moving.Speed.gravity;
+                if(moving.Speed.height < moving.Speed.jump*-1){
+                    moving.Speed.height = moving.Speed.jump*-1;
+                }
+            }
             
-        ;
+            
 
 
-        playerRagid.velocity = new UnityEngine.Vector3(
-            (float)moving_x,
-            moving.Speed.height,
-            (float)moving_z
-        );
+            playerRagid.velocity = new UnityEngine.Vector3(
+                0,
+                moving.Speed.height,
+                0
+            );
 
-
-        //マウス視点移動
-        player.Rotate(0,3*Input.GetAxis("Mouse X")*MouseSensitive,0);
-        camera.Rotate(Input.GetAxis("Mouse Y")*-1*MouseSensitive,0,0);
-        
-        
-        //DataBase.BordMassage += 
-        //    "posi:\n"+player.position.x +"\n,"+ player.position.y +"\n,"+ player.position.z+"\n"+
-        //    "move:\n"+moving.Speed.width +"\n,"+ moving.Speed.height +"\n,"+ moving.Speed.vertical
-        //;
+        }
 
 
 
