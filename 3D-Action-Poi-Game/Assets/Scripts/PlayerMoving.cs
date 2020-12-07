@@ -80,19 +80,44 @@ public class PlayerMoving : MonoBehaviour
 
     public static class attack{
         public static Color obj = GameObject.Find("Effect").GetComponent<Renderer>().material.color;
+        public static Transform tra = GameObject.Find("Effect").transform;
         public static float EffectFlameMax = 1.0f;
         public static float EffectFlameDiff = 0.1f;
         public static int EffectFlameNow = Convert.ToInt32(EffectFlameMax/EffectFlameDiff);
 
+        public static int EffectFlameNum = EffectFlameNow;
+
         public static bool EffectDoing = false;
 
+        public static int AttackNum = 10;
+
+
         public static int FadeEffect(){
+
+            if(
+                EffectFlameNow == EffectFlameNum && 
+                DataBase.AttackTo != null && 
+                DataBase.AttackTo.gameObject.tag == "Enemy" && 
+                DataBase.AttackTo.gameObject.GetComponent<Enemy>()
+            ){
+                
+                
+                GameObject.Find(DataBase.AttackTo.gameObject.name).GetComponent<Enemy>().HitAttacked(AttackNum);
+
+                //aaa.HitAttacked(AttackNum) ;
+
+                //DataBase.BordMassage_Hit = "\n攻撃:"+EffectFlameNow+":"+DataBase.AttackTo.gameObject.name;
+                //Debug.Log(EffectFlameNow+":"+DataBase.AttackTo.gameObject.name);
+            }else{
+                //DataBase.BordMassage_Hit = "\n攻撃あたってないよ";
+            }
+            //DataBase.AttackTo = null;
 
             GameObject.Find("Effect").GetComponent<Renderer>().material.color = 
                 new Color(obj.r,obj.g,obj.b ,EffectFlameNow*EffectFlameDiff);
             EffectFlameNow -= 1;
             if(EffectFlameNow <0){
-                EffectFlameNow = Convert.ToInt32(EffectFlameMax/EffectFlameDiff);
+                EffectFlameNow = EffectFlameNum;
                 EffectDoing = false;
                 return 1;
             }
@@ -254,7 +279,7 @@ public class PlayerMoving : MonoBehaviour
                 attack.FadeEffect();
             }
         }else{
-            attack.FadeEffect();     
+
 
 
             arml.Rotate(-1*RotatePosition,0,0);
@@ -289,6 +314,7 @@ public class PlayerMoving : MonoBehaviour
                 0
             );
 
+            attack.FadeEffect();     
         }
 
 
